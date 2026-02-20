@@ -1,0 +1,60 @@
+-- =========================
+-- 🦘 INFINITE JUMP SYSTEM
+-- =========================
+
+local infiniteJumpEnabled = false
+
+local jumpButton = Instance.new("TextButton")
+jumpButton.Size = UDim2.new(0, 160, 0, 40)
+jumpButton.Position = UDim2.new(0.5, -80, 0, 220)
+jumpButton.BackgroundColor3 = Color3.fromRGB(35,35,60)
+jumpButton.Text = "Infinite Jump: OFF"
+jumpButton.TextColor3 = Color3.new(1,1,1)
+jumpButton.TextScaled = true
+jumpButton.Font = Enum.Font.GothamBold
+jumpButton.Parent = mainFrame
+
+local jumpCorner = Instance.new("UICorner")
+jumpCorner.CornerRadius = UDim.new(0,10)
+jumpCorner.Parent = jumpButton
+
+local UserInputService = game:GetService("UserInputService")
+
+local function setupInfiniteJump(character)
+	local humanoid = character:WaitForChild("Humanoid")
+
+	UserInputService.JumpRequest:Connect(function()
+		if infiniteJumpEnabled and humanoid then
+			-- Só pula se não estiver morto
+			if humanoid.Health > 0 then
+				
+				-- Evita estado quebrado
+				if humanoid:GetState() ~= Enum.HumanoidStateType.Dead then
+					humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
+				end
+			end
+		end
+	end)
+end
+
+jumpButton.MouseButton1Click:Connect(function()
+	infiniteJumpEnabled = not infiniteJumpEnabled
+	
+	if infiniteJumpEnabled then
+		jumpButton.Text = "Infinite Jump: ON"
+		jumpButton.BackgroundColor3 = Color3.fromRGB(170, 0, 255)
+		
+		if player.Character then
+			setupInfiniteJump(player.Character)
+		end
+	else
+		jumpButton.Text = "Infinite Jump: OFF"
+		jumpButton.BackgroundColor3 = Color3.fromRGB(35,35,60)
+	end
+end)
+
+player.CharacterAdded:Connect(function(character)
+	if infiniteJumpEnabled then
+		setupInfiniteJump(character)
+	end
+end)
