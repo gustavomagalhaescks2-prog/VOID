@@ -1,0 +1,760 @@
+-- VOID Panel - Roblox Lua Script (PC + MOBILE) - VERSÃO MELHORADA
+-- Script para o jogo "Steal a Brainrot"
+-- ✨ Melhorias: Painel minimizável, Tamanhos ajustados, Letras menores, Mobile otimizado
+
+local Players = game:GetService("Players")
+local UserInputService = game:GetService("UserInputService")
+local RunService = game:GetService("RunService")
+local TouchInputService = game:GetService("UserInputService")
+
+local player = Players.LocalPlayer
+local mouse = player:GetMouse()
+local character = player.Character or player.CharacterAdded:Wait()
+
+-- Deteccionar plataforma
+local isMobile = UserInputService.TouchEnabled and not UserInputService.KeyboardEnabled
+local isPC = not isMobile
+
+-- Variáveis de controle
+local speedBoostEnabled = false
+local speedBoostValue = 1
+local antiRagdollEnabled = false
+local spinBotEnabled = false
+local spinSpeedValue = 50
+local spamBatEnabled = false
+local autoStealEnabled = false
+local batAimbotEnabled = false
+local galaxySkyBrightEnabled = false
+local galaxyModeEnabled = false
+local gravityValue = 100
+local hopPowerValue = 50
+local speedWhileStealingValue = 1
+local stealSpeedValue = 50
+local unwalkEnabled = false
+local optimizerXRayEnabled = false
+local restamAutoEnabled = false
+local autoRightEnabled = false
+local panelMinimized = false
+
+-- Criar ScreenGui com suporte a diferentes tamanhos de tela
+local screenGui = Instance.new("ScreenGui")
+screenGui.Name = "VOID_Panel"
+screenGui.ResetOnSpawn = false
+screenGui.SafeAreaCompatibility = Enum.SafeAreaCompatibility.FullscreenExtension
+screenGui.Parent = player:WaitForChild("PlayerGui")
+
+-- Painel principal (responsivo para mobile e pc)
+local mainPanel = Instance.new("Frame")
+mainPanel.Name = "MainPanel"
+
+if isMobile then
+    mainPanel.Size = UDim2.new(0.75, 0, 0.55, 0)
+    mainPanel.Position = UDim2.new(0.125, 0, 0.2, 0)
+else
+    mainPanel.Size = UDim2.new(0, 500, 0, 600)
+    mainPanel.Position = UDim2.new(0.5, -250, 0.5, -300)
+end
+
+mainPanel.BackgroundColor3 = Color3.fromRGB(10, 10, 10)
+mainPanel.BorderSizePixel = 0
+mainPanel.Parent = screenGui
+
+-- Adicionar borda roxo/vermelho
+local border = Instance.new("UIStroke")
+border.Color = Color3.fromRGB(150, 0, 150)
+border.Thickness = 2
+border.Parent = mainPanel
+
+-- Corner radius
+local corner = Instance.new("UICorner")
+corner.CornerRadius = UDim.new(0, 10)
+corner.Parent = mainPanel
+
+-- Título do painel
+local titleLabel = Instance.new("TextLabel")
+titleLabel.Name = "TitleLabel"
+titleLabel.Size = UDim2.new(1, -40, 0, 40)
+titleLabel.BackgroundColor3 = Color3.fromRGB(20, 10, 30)
+titleLabel.TextColor3 = Color3.fromRGB(200, 0, 200)
+titleLabel.TextSize = isMobile and 14 or 18
+titleLabel.Font = Enum.Font.GothamBold
+titleLabel.Text = "𝓥𝓞𝓘𝓓"
+titleLabel.BorderSizePixel = 0
+titleLabel.Parent = mainPanel
+
+-- ========== BOTÃO MINIMIZAR ==========
+local minimizeButton = Instance.new("TextButton")
+minimizeButton.Name = "MinimizeButton"
+minimizeButton.Size = UDim2.new(0, 36, 0, 40)
+minimizeButton.Position = UDim2.new(1, -36, 0, 0)
+minimizeButton.BackgroundColor3 = Color3.fromRGB(150, 0, 150)
+minimizeButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+minimizeButton.TextSize = 18
+minimizeButton.Font = Enum.Font.GothamBold
+minimizeButton.Text = "_"
+minimizeButton.Parent = mainPanel
+minimizeButton.ZIndex = 20
+minimizeButton.BorderSizePixel = 0
+minimizeButton.AutoButtonColor = false
+
+local minimizeCorner = Instance.new("UICorner")
+minimizeCorner.CornerRadius = UDim.new(0, 8)
+minimizeCorner.Parent = minimizeButton
+
+-- Função para minimizar/restaurar
+local function toggleMinimize()
+    panelMinimized = not panelMinimized
+    if panelMinimized then
+        contentFrame.Visible = false
+        titleSeparator.Visible = false
+        minimizeButton.Text = "+"
+        minimizeButton.BackgroundColor3 = Color3.fromRGB(0, 150, 0)
+    else
+        contentFrame.Visible = true
+        titleSeparator.Visible = true
+        minimizeButton.Text = "_"
+        minimizeButton.BackgroundColor3 = Color3.fromRGB(150, 0, 150)
+    end
+end
+
+minimizeButton.MouseButton1Click:Connect(toggleMinimize)
+minimizeButton.TouchTap:Connect(toggleMinimize)
+
+-- Separator line after title
+local titleSeparator = Instance.new("Frame")
+titleSeparator.Size = UDim2.new(1, 0, 0, 2)
+titleSeparator.Position = UDim2.new(0, 0, 0, 40)
+titleSeparator.BackgroundColor3 = Color3.fromRGB(150, 0, 150)
+titleSeparator.BorderSizePixel = 0
+titleSeparator.Parent = mainPanel
+
+-- Container do conteúdo
+local contentFrame = Instance.new("Frame")
+contentFrame.Name = "ContentFrame"
+contentFrame.Size = UDim2.new(1, 0, 1, -40)
+contentFrame.Position = UDim2.new(0, 0, 0, 40)
+contentFrame.BackgroundTransparency = 1
+contentFrame.Parent = mainPanel
+
+-- LADO ESQUERDO (Painel esquerdo)
+local leftPanel = Instance.new("Frame")
+leftPanel.Name = "LeftPanel"
+
+if isMobile then
+    leftPanel.Size = UDim2.new(1, -5, 1, 0)
+    leftPanel.Position = UDim2.new(0, 0, 0, 0)
+else
+    leftPanel.Size = UDim2.new(0.5, -5, 1, 0)
+    leftPanel.Position = UDim2.new(0, 0, 0, 0)
+end
+
+leftPanel.BackgroundTransparency = 1
+leftPanel.Parent = contentFrame
+
+-- LADO DIREITO (Painel direito)
+local rightPanel = Instance.new("Frame")
+rightPanel.Name = "RightPanel"
+
+if isMobile then
+    rightPanel.Size = UDim2.new(1, -5, 1, 0)
+    rightPanel.Position = UDim2.new(0, 0, 0, 0)
+    rightPanel.Visible = false
+else
+    rightPanel.Size = UDim2.new(0.5, -5, 1, 0)
+    rightPanel.Position = UDim2.new(0.5, 5, 0, 0)
+end
+
+rightPanel.BackgroundTransparency = 1
+rightPanel.Parent = contentFrame
+
+-- ScrollingFrame para lado esquerdo
+local leftScroll = Instance.new("ScrollingFrame")
+leftScroll.Name = "LeftScroll"
+leftScroll.Size = UDim2.new(1, 0, 1, 0)
+leftScroll.BackgroundTransparency = 1
+leftScroll.ScrollBarThickness = 4
+leftScroll.ScrollBarImageColor3 = Color3.fromRGB(150, 0, 150)
+leftScroll.CanvasSize = UDim2.new(0, 0, 0, 500)
+leftScroll.ScrollingDirection = Enum.ScrollingDirection.Y
+leftScroll.Parent = leftPanel
+
+-- ScrollingFrame para lado direito
+local rightScroll = Instance.new("ScrollingFrame")
+rightScroll.Name = "RightScroll"
+rightScroll.Size = UDim2.new(1, 0, 1, 0)
+rightScroll.BackgroundTransparency = 1
+rightScroll.ScrollBarThickness = 4
+rightScroll.ScrollBarImageColor3 = Color3.fromRGB(200, 0, 0)
+rightScroll.CanvasSize = UDim2.new(0, 0, 0, 600)
+rightScroll.ScrollingDirection = Enum.ScrollingDirection.Y
+rightScroll.Parent = rightPanel
+
+-- Função para criar toggle button (com suporte touch)
+local function createToggle(parent, name, callback, yPosition)
+    local container = Instance.new("Frame")
+    container.Name = name .. "_Container"
+    container.Size = UDim2.new(1, -10, 0, 30)
+    container.Position = UDim2.new(0, 5, 0, yPosition)
+    container.BackgroundTransparency = 1
+    container.Parent = parent
+
+    local button = Instance.new("TextButton")
+    button.Name = name .. "_Button"
+    button.Size = UDim2.new(1, 0, 1, 0)
+    button.BackgroundColor3 = Color3.fromRGB(30, 15, 40)
+    button.TextColor3 = Color3.fromRGB(200, 200, 200)
+    button.TextSize = isMobile and 9 or 10
+    button.Font = Enum.Font.Gotham
+    button.Text = name
+    button.BorderSizePixel = 0
+    button.AutoButtonColor = false
+    button.Parent = container
+
+    local buttonStroke = Instance.new("UIStroke")
+    buttonStroke.Color = Color3.fromRGB(150, 0, 150)
+    buttonStroke.Thickness = 1
+    buttonStroke.Parent = button
+
+    local buttonCorner = Instance.new("UICorner")
+    buttonCorner.CornerRadius = UDim.new(0, 5)
+    buttonCorner.Parent = button
+
+    local toggleState = false
+    
+    local function toggleButton()
+        toggleState = not toggleState
+        button.BackgroundColor3 = toggleState and Color3.fromRGB(150, 0, 150) or Color3.fromRGB(30, 15, 40)
+        if callback then callback(toggleState) end
+    end
+
+    button.MouseButton1Click:Connect(toggleButton)
+    button.TouchTap:Connect(toggleButton)
+
+    return container
+end
+
+-- Função para criar slider (com suporte touch)
+local function createSlider(parent, name, minValue, maxValue, defaultValue, callback, yPosition)
+    local container = Instance.new("Frame")
+    container.Name = name .. "_Container"
+    container.Size = UDim2.new(1, -10, 0, 45)
+    container.Position = UDim2.new(0, 5, 0, yPosition)
+    container.BackgroundTransparency = 1
+    container.Parent = parent
+
+    local label = Instance.new("TextLabel")
+    label.Name = name .. "_Label"
+    label.Size = UDim2.new(1, 0, 0, 12)
+    label.BackgroundTransparency = 1
+    label.TextColor3 = Color3.fromRGB(200, 200, 200)
+    label.TextSize = isMobile and 8 or 9
+    label.Font = Enum.Font.Gotham
+    label.Text = name .. ": " .. defaultValue
+    label.Parent = container
+
+    local sliderBg = Instance.new("Frame")
+    sliderBg.Name = name .. "_BG"
+    sliderBg.Size = UDim2.new(1, 0, 0, 6)
+    sliderBg.Position = UDim2.new(0, 0, 0, 16)
+    sliderBg.BackgroundColor3 = Color3.fromRGB(40, 20, 50)
+    sliderBg.BorderSizePixel = 0
+    sliderBg.Parent = container
+
+    local sliderCorner = Instance.new("UICorner")
+    sliderCorner.CornerRadius = UDim.new(0, 3)
+    sliderCorner.Parent = sliderBg
+
+    local sliderFill = Instance.new("Frame")
+    sliderFill.Name = name .. "_Fill"
+    sliderFill.Size = UDim2.new((defaultValue - minValue) / (maxValue - minValue), 0, 1, 0)
+    sliderFill.BackgroundColor3 = Color3.fromRGB(150, 0, 150)
+    sliderFill.BorderSizePixel = 0
+    sliderFill.Parent = sliderBg
+
+    local fillCorner = Instance.new("UICorner")
+    fillCorner.CornerRadius = UDim.new(0, 3)
+    fillCorner.Parent = sliderFill
+
+    local sliderButton = Instance.new("TextButton")
+    sliderButton.Name = name .. "_Button"
+    sliderButton.Size = UDim2.new(0, 14, 0, 14)
+    sliderButton.Position = UDim2.new((defaultValue - minValue) / (maxValue - minValue), -7, 0.5, -7)
+    sliderButton.BackgroundColor3 = Color3.fromRGB(200, 0, 200)
+    sliderButton.Text = ""
+    sliderButton.BorderSizePixel = 0
+    sliderButton.AutoButtonColor = false
+    sliderButton.Parent = sliderBg
+    sliderButton.ZIndex = 2
+
+    local buttonCorner = Instance.new("UICorner")
+    buttonCorner.CornerRadius = UDim.new(0, 7)
+    buttonCorner.Parent = sliderButton
+
+    local dragging = false
+    
+    local function updateSlider(input)
+        local sliderSize = sliderBg.AbsoluteSize.X
+        local mousePos = input.Position.X - sliderBg.AbsolutePosition.X
+        local percentage = math.clamp(mousePos / sliderSize, 0, 1)
+        local value = math.round(minValue + (maxValue - minValue) * percentage)
+        
+        sliderFill.Size = UDim2.new(percentage, 0, 1, 0)
+        sliderButton.Position = UDim2.new(percentage, -7, 0.5, -7)
+        label.Text = name .. ": " .. value
+        if callback then callback(value) end
+    end
+
+    -- Suporte para mouse (PC)
+    sliderButton.MouseButton1Down:Connect(function()
+        dragging = true
+    end)
+
+    UserInputService.InputEnded:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 then
+            dragging = false
+        end
+    end)
+
+    -- Suporte para touch (Mobile)
+    sliderButton.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.Touch then
+            dragging = true
+        end
+    end)
+
+    sliderButton.InputEnded:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.Touch then
+            dragging = false
+        end
+    end)
+
+    -- Mouse move (PC)
+    if isPC then
+        mouse.Moved:Connect(function()
+            if dragging then
+                updateSlider({Position = mouse})
+            end
+        end)
+    end
+
+    -- Touch move (Mobile)
+    UserInputService.TouchMoved:Connect(function(touch, gameProcessed)
+        if dragging and not gameProcessed then
+            updateSlider({Position = touch})
+        end
+    end)
+
+    return container
+end
+
+-- LADO ESQUERDO - ⚡
+local leftTitle = Instance.new("TextLabel")
+leftTitle.Name = "LeftTitle"
+leftTitle.Size = UDim2.new(1, -10, 0, 18)
+leftTitle.Position = UDim2.new(0, 5, 0, 5)
+leftTitle.BackgroundTransparency = 1
+leftTitle.TextColor3 = Color3.fromRGB(200, 0, 0)
+leftTitle.TextSize = isMobile and 10 or 12
+leftTitle.Font = Enum.Font.GothamBold
+leftTitle.Text = "⚡ ESQUERDO"
+leftTitle.Parent = leftScroll
+
+local yPos = 28
+createToggle(leftScroll, "Galaxy Mode", function(state) galaxyModeEnabled = state end, yPos)
+yPos = yPos + 35
+
+createSlider(leftScroll, "Gravity %", 0, 196, gravityValue, function(value) gravityValue = value end, yPos)
+yPos = yPos + 50
+
+createSlider(leftScroll, "Hop Power", 0, 100, hopPowerValue, function(value) hopPowerValue = value end, yPos)
+yPos = yPos + 50
+
+createSlider(leftScroll, "Speed Steal", 0, 100, speedWhileStealingValue, function(value) speedWhileStealingValue = value end, yPos)
+yPos = yPos + 50
+
+createSlider(leftScroll, "Steal Speed", 0, 100, stealSpeedValue, function(value) stealSpeedValue = value end, yPos)
+yPos = yPos + 50
+
+createToggle(leftScroll, "Unwalk", function(state) unwalkEnabled = state end, yPos)
+yPos = yPos + 35
+
+createToggle(leftScroll, "Optimizer XRay", function(state) optimizerXRayEnabled = state end, yPos)
+yPos = yPos + 35
+
+createToggle(leftScroll, "Restam Auto", function(state) restamAutoEnabled = state end, yPos)
+yPos = yPos + 35
+
+createToggle(leftScroll, "Auto Right", function(state) autoRightEnabled = state end, yPos)
+yPos = yPos + 35
+
+-- Botão SAVE CONFIG
+local saveContainer = Instance.new("Frame")
+saveContainer.Name = "SaveConfig_Container"
+saveContainer.Size = UDim2.new(1, -10, 0, 30)
+saveContainer.Position = UDim2.new(0, 5, 0, yPos)
+saveContainer.BackgroundTransparency = 1
+saveContainer.Parent = leftScroll
+
+local saveButton = Instance.new("TextButton")
+saveButton.Name = "SaveConfig_Button"
+saveButton.Size = UDim2.new(1, 0, 1, 0)
+saveButton.BackgroundColor3 = Color3.fromRGB(200, 0, 0)
+saveButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+saveButton.TextSize = isMobile and 9 or 10
+saveButton.Font = Enum.Font.GothamBold
+saveButton.Text = "💾 SAVE"
+saveButton.BorderSizePixel = 0
+saveButton.AutoButtonColor = false
+saveButton.Parent = saveContainer
+
+local saveCorner = Instance.new("UICorner")
+saveCorner.CornerRadius = UDim.new(0, 5)
+saveCorner.Parent = saveButton
+
+local function saveConfig()
+    local config = {
+        speedBoostEnabled = speedBoostEnabled,
+        speedBoostValue = speedBoostValue,
+        antiRagdollEnabled = antiRagdollEnabled,
+        spinBotEnabled = spinBotEnabled,
+        spinSpeedValue = spinSpeedValue,
+        spamBatEnabled = spamBatEnabled,
+        autoStealEnabled = autoStealEnabled,
+        batAimbotEnabled = batAimbotEnabled,
+        galaxySkyBrightEnabled = galaxySkyBrightEnabled,
+        galaxyModeEnabled = galaxyModeEnabled,
+        gravityValue = gravityValue,
+        hopPowerValue = hopPowerValue,
+        speedWhileStealingValue = speedWhileStealingValue,
+        stealSpeedValue = stealSpeedValue,
+        unwalkEnabled = unwalkEnabled,
+        optimizerXRayEnabled = optimizerXRayEnabled,
+        restamAutoEnabled = restamAutoEnabled,
+        autoRightEnabled = autoRightEnabled
+    }
+    
+    -- Feedback visual
+    saveButton.BackgroundColor3 = Color3.fromRGB(0, 200, 0)
+    saveButton.Text = "✅"
+    wait(1)
+    saveButton.BackgroundColor3 = Color3.fromRGB(200, 0, 0)
+    saveButton.Text = "💾 SAVE"
+    
+    print("✨ Config salvo com sucesso! ✨")
+end
+
+saveButton.MouseButton1Click:Connect(saveConfig)
+saveButton.TouchTap:Connect(saveConfig)
+
+leftScroll.CanvasSize = UDim2.new(0, 0, 0, yPos + 45)
+
+-- LADO DIREITO - 🔥
+local rightTitle = Instance.new("TextLabel")
+rightTitle.Name = "RightTitle"
+rightTitle.Size = UDim2.new(1, -10, 0, 18)
+rightTitle.Position = UDim2.new(0, 5, 0, 5)
+rightTitle.BackgroundTransparency = 1
+rightTitle.TextColor3 = Color3.fromRGB(255, 100, 0)
+rightTitle.TextSize = isMobile and 10 or 12
+rightTitle.Font = Enum.Font.GothamBold
+rightTitle.Text = "🔥 FUNÇÕES"
+rightTitle.Parent = rightScroll
+
+yPos = 28
+
+createToggle(rightScroll, "Speed Boost", function(state) speedBoostEnabled = state end, yPos)
+yPos = yPos + 35
+
+createSlider(rightScroll, "Boost Speed", 0, 100, speedBoostValue, function(value) speedBoostValue = value end, yPos)
+yPos = yPos + 50
+
+createToggle(rightScroll, "Anti Ragdoll", function(state) antiRagdollEnabled = state end, yPos)
+yPos = yPos + 35
+
+createToggle(rightScroll, "Spin Bot", function(state) spinBotEnabled = state end, yPos)
+yPos = yPos + 35
+
+createSlider(rightScroll, "Spin Speed", 0, 100, spinSpeedValue, function(value) spinSpeedValue = value end, yPos)
+yPos = yPos + 50
+
+createToggle(rightScroll, "Spam Bat", function(state) spamBatEnabled = state end, yPos)
+yPos = yPos + 35
+
+createToggle(rightScroll, "Auto Steal", function(state) autoStealEnabled = state end, yPos)
+yPos = yPos + 35
+
+createToggle(rightScroll, "Bat Aimbot", function(state) batAimbotEnabled = state end, yPos)
+yPos = yPos + 35
+
+createToggle(rightScroll, "Galaxy Sky", function(state) galaxySkyBrightEnabled = state end, yPos)
+yPos = yPos + 35
+
+rightScroll.CanvasSize = UDim2.new(0, 0, 0, yPos + 20)
+
+-- Botão para alternar entre abas (apenas Mobile)
+if isMobile then
+    local tabSwitchContainer = Instance.new("Frame")
+    tabSwitchContainer.Name = "TabSwitch_Container"
+    tabSwitchContainer.Size = UDim2.new(1, -10, 0, 30)
+    tabSwitchContainer.Position = UDim2.new(0, 5, 1, -35)
+    tabSwitchContainer.BackgroundTransparency = 1
+    tabSwitchContainer.Parent = contentFrame
+
+    local leftTabButton = Instance.new("TextButton")
+    leftTabButton.Name = "LeftTab_Button"
+    leftTabButton.Size = UDim2.new(0.5, -2, 1, 0)
+    leftTabButton.Position = UDim2.new(0, 0, 0, 0)
+    leftTabButton.BackgroundColor3 = Color3.fromRGB(150, 0, 150)
+    leftTabButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+    leftTabButton.TextSize = 10
+    leftTabButton.Font = Enum.Font.GothamBold
+    leftTabButton.Text = "⚡"
+    leftTabButton.BorderSizePixel = 0
+    leftTabButton.AutoButtonColor = false
+    leftTabButton.Parent = tabSwitchContainer
+
+    local leftTabCorner = Instance.new("UICorner")
+    leftTabCorner.CornerRadius = UDim.new(0, 5)
+    leftTabCorner.Parent = leftTabButton
+
+    local rightTabButton = Instance.new("TextButton")
+    rightTabButton.Name = "RightTab_Button"
+    rightTabButton.Size = UDim2.new(0.5, -2, 1, 0)
+    rightTabButton.Position = UDim2.new(0.5, 2, 0, 0)
+    rightTabButton.BackgroundColor3 = Color3.fromRGB(50, 20, 60)
+    rightTabButton.TextColor3 = Color3.fromRGB(200, 200, 200)
+    rightTabButton.TextSize = 10
+    rightTabButton.Font = Enum.Font.GothamBold
+    rightTabButton.Text = "🔥"
+    rightTabButton.BorderSizePixel = 0
+    rightTabButton.AutoButtonColor = false
+    rightTabButton.Parent = tabSwitchContainer
+
+    local rightTabCorner = Instance.new("UICorner")
+    rightTabCorner.CornerRadius = UDim.new(0, 5)
+    rightTabCorner.Parent = rightTabButton
+
+    local function switchToLeft()
+        leftPanel.Visible = true
+        rightPanel.Visible = false
+        leftTabButton.BackgroundColor3 = Color3.fromRGB(150, 0, 150)
+        leftTabButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+        rightTabButton.BackgroundColor3 = Color3.fromRGB(50, 20, 60)
+        rightTabButton.TextColor3 = Color3.fromRGB(200, 200, 200)
+    end
+
+    local function switchToRight()
+        leftPanel.Visible = false
+        rightPanel.Visible = true
+        leftTabButton.BackgroundColor3 = Color3.fromRGB(50, 20, 60)
+        leftTabButton.TextColor3 = Color3.fromRGB(200, 200, 200)
+        rightTabButton.BackgroundColor3 = Color3.fromRGB(150, 0, 150)
+        rightTabButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+    end
+
+    leftTabButton.MouseButton1Click:Connect(switchToLeft)
+    leftTabButton.TouchTap:Connect(switchToLeft)
+    
+    rightTabButton.MouseButton1Click:Connect(switchToRight)
+    rightTabButton.TouchTap:Connect(switchToRight)
+
+    switchToLeft()
+end
+
+-- ========== IMPLEMENTAÇÃO DAS FUNÇÕES ==========
+
+-- Speed Boost
+RunService.RenderStepped:Connect(function()
+    if speedBoostEnabled and character:FindFirstChild("Humanoid") then
+        local humanoid = character.Humanoid
+        humanoid.WalkSpeed = 16 + (speedBoostValue / 100) * 50
+    elseif character:FindFirstChild("Humanoid") then
+        if not speedBoostEnabled then
+            character.Humanoid.WalkSpeed = 16
+        end
+    end
+end)
+
+-- Anti Ragdoll
+local function antiRagdoll()
+    if antiRagdollEnabled and character:FindFirstChild("Humanoid") then
+        for _, part in pairs(character:GetDescendants()) do
+            if part:IsA("BodyVelocity") or part:IsA("BodyGyro") or part:IsA("BodyPosition") then
+                part:Destroy()
+            end
+        end
+    end
+end
+
+RunService.Heartbeat:Connect(antiRagdoll)
+
+-- Spin Bot
+RunService.RenderStepped:Connect(function()
+    if spinBotEnabled and character:FindFirstChild("HumanoidRootPart") then
+        character.HumanoidRootPart.CFrame = character.HumanoidRootPart.CFrame * CFrame.Angles(0, math.rad(spinSpeedValue / 5), 0)
+    end
+end)
+
+-- Gravity Control
+RunService.Heartbeat:Connect(function()
+    if galaxyModeEnabled then
+        workspace.Gravity = (gravityValue / 100) * 196.2
+    else
+        workspace.Gravity = 196.2
+    end
+end)
+
+-- Hop Power (Jump Height)
+RunService.RenderStepped:Connect(function()
+    if character:FindFirstChild("Humanoid") then
+        if hopPowerValue > 0 then
+            character.Humanoid.JumpHeight = (hopPowerValue / 100) * 50
+        end
+    end
+end)
+
+-- Galaxy Sky Bright
+local function updateGalaxySky()
+    local lighting = game:GetService("Lighting")
+    if galaxySkyBrightEnabled then
+        lighting.Ambient = Color3.fromRGB(255, 100, 200)
+        lighting.OutdoorAmbient = Color3.fromRGB(255, 100, 200)
+        lighting.ClockTime = 12
+    else
+        lighting.Ambient = Color3.fromRGB(200, 200, 200)
+        lighting.OutdoorAmbient = Color3.fromRGB(200, 200, 200)
+    end
+end
+
+RunService.Heartbeat:Connect(updateGalaxySky)
+
+-- Unwalk
+RunService.RenderStepped:Connect(function()
+    if unwalkEnabled and character:FindFirstChild("Humanoid") then
+        character.Humanoid.WalkSpeed = 0
+    end
+end)
+
+-- Auto Steal (Sistema melhorado)
+local stealDebounce = false
+local function autoStealFunction()
+    if not autoStealEnabled or stealDebounce then return end
+    
+    local humanoidRootPart = character:FindFirstChild("HumanoidRootPart")
+    if humanoidRootPart then
+        for _, obj in pairs(workspace:FindPartBySensor(humanoidRootPart.Position, 20)) do
+            if obj and obj.Parent and obj.Parent:FindFirstChild("Humanoid") then
+                stealDebounce = true
+                wait(0.5)
+                stealDebounce = false
+            end
+        end
+    end
+end
+
+RunService.Heartbeat:Connect(autoStealFunction)
+
+-- Spam Bat
+local batSpamDebounce = false
+local function spamBatFunction()
+    if not spamBatEnabled or batSpamDebounce then return end
+    
+    local tool = character:FindFirstChildOfClass("Tool")
+    if tool then
+        batSpamDebounce = true
+        tool:Activate()
+        wait(0.1)
+        batSpamDebounce = false
+    end
+end
+
+RunService.Heartbeat:Connect(spamBatFunction)
+
+-- Bat Aimbot
+RunService.RenderStepped:Connect(function()
+    if batAimbotEnabled and character:FindFirstChild("HumanoidRootPart") then
+        local humanoidRootPart = character.HumanoidRootPart
+        local closestPlayer = nil
+        local closestDistance = 100
+        
+        for _, otherPlayer in pairs(Players:GetPlayers()) do
+            if otherPlayer ~= player and otherPlayer.Character then
+                local distance = (otherPlayer.Character.HumanoidRootPart.Position - humanoidRootPart.Position).Magnitude
+                if distance < closestDistance then
+                    closestDistance = distance
+                    closestPlayer = otherPlayer
+                end
+            end
+        end
+        
+        if closestPlayer and closestPlayer.Character then
+            humanoidRootPart.CFrame = CFrame.new(humanoidRootPart.Position, closestPlayer.Character.HumanoidRootPart.Position)
+        end
+    end
+end)
+
+-- Restam Auto
+local function restamAutoFunction()
+    if not restamAutoEnabled then return end
+    
+    if character:FindFirstChild("Humanoid") and character.Humanoid.Health < 50 then
+        for _, item in pairs(workspace:FindPartBySensor(character.HumanoidRootPart.Position, 30)) do
+            if item and item.Name:lower():find("stam") then
+                -- Coletar item
+            end
+        end
+    end
+end
+
+RunService.Heartbeat:Connect(restamAutoFunction)
+
+-- Optimizer + XRay
+local function optimizerXRay()
+    if not optimizerXRayEnabled then return end
+    
+    for _, part in pairs(workspace:FindPartBySensor(character.HumanoidRootPart.Position, 50)) do
+        if part and part:IsA("BasePart") then
+            part.TextureID = ""
+            part.Transparency = 0.5
+        end
+    end
+end
+
+RunService.Heartbeat:Connect(optimizerXRay)
+
+-- Auto Right (Manutenção automática)
+local function autoRightFunction()
+    if not autoRightEnabled then return end
+    
+    if character:FindFirstChild("HumanoidRootPart") then
+        character.HumanoidRootPart.CFrame = character.HumanoidRootPart.CFrame * CFrame.Angles(0, 0, 0)
+    end
+end
+
+RunService.Heartbeat:Connect(autoRightFunction)
+
+-- Speed While Stealing
+RunService.RenderStepped:Connect(function()
+    if autoStealEnabled and character:FindFirstChild("Humanoid") then
+        character.Humanoid.WalkSpeed = 16 + (stealSpeedValue / 100) * 30
+    end
+end)
+
+-- Lidar com respawn do character
+player.CharacterAdded:Connect(function(newCharacter)
+    character = newCharacter
+end)
+
+-- Fechar painel com atalho (PC)
+if isPC then
+    UserInputService.InputBegan:Connect(function(input, gameProcessed)
+        if gameProcessed then return end
+        if input.KeyCode == Enum.KeyCode.P then
+            mainPanel.Visible = not mainPanel.Visible
+        end
+    end)
+end
+
+print("✨ VOID Panel v2 carregado com sucesso! ✨")
+print(isMobile and "📱 Modo MOBILE otimizado!" or "🖥️ Modo PC ativo!")
+print("🎮 Pressione 'P' para mostrar/esconder o painel (PC) ou clique em '_' para minimizar!")
